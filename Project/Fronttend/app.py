@@ -1,6 +1,5 @@
 import streamlit as st
 import requests
-import random
 
 # ==============================
 # Page Config
@@ -99,38 +98,46 @@ st.markdown(
 )
 
 # ==============================
-# Random Data Generator
+# Labelled Demo Transactions
 # ==============================
 
-if st.button("Generate Random Test Values"):
+# Source labels: FraudDetection.ipynb, df.head() rows 0 (genuine) and 2 (fraud).
+# These examples populate inputs only; the API independently predicts the result.
+DEMO_TRANSACTIONS = {
+    "genuine": {
+        "step": 1,
+        "type": (3, "PAYMENT"),
+        "amount": 9839.64,
+        "oldbalanceOrg": 170136.0,
+        "newbalanceOrig": 160296.36,
+        "oldbalanceDest": 0.0,
+        "newbalanceDest": 0.0,
+        "isFlaggedFraud": 0,
+    },
+    "fraud": {
+        "step": 1,
+        "type": (4, "TRANSFER"),
+        "amount": 181.0,
+        "oldbalanceOrg": 181.0,
+        "newbalanceOrig": 0.0,
+        "oldbalanceDest": 0.0,
+        "newbalanceDest": 0.0,
+        "isFlaggedFraud": 0,
+    },
+}
 
-    transaction_types = [
-        (0, "CASH-IN"),
-        (1, "CASH-OUT"),
-        (2, "DEBIT"),
-        (3, "PAYMENT"),
-        (4, "TRANSFER")
-    ]
 
-    st.session_state.step = random.randint(1, 744)
-    st.session_state.type = random.choice(transaction_types)
+def load_demo(kind):
+    st.session_state.update(DEMO_TRANSACTIONS[kind])
 
-    amount = random.randint(1000, 1000000)
 
-    old_org = random.randint(amount, amount + 500000)
+demo_genuine, demo_fraud = st.columns(2)
+with demo_genuine:
+    st.button("Generate Genuine Demo", on_click=load_demo, args=("genuine",))
+with demo_fraud:
+    st.button("Generate Fraud Demo", on_click=load_demo, args=("fraud",))
 
-    new_org = max(0, old_org - amount)
-
-    old_dest = random.randint(0, 500000)
-
-    new_dest = old_dest + amount
-
-    st.session_state.amount = float(amount)
-    st.session_state.oldbalanceOrg = float(old_org)
-    st.session_state.newbalanceOrig = float(new_org)
-    st.session_state.oldbalanceDest = float(old_dest)
-    st.session_state.newbalanceDest = float(new_dest)
-    st.session_state.isFlaggedFraud = random.choice([0, 1])
+st.caption("Load a labelled sample transaction, then click Predict Transaction Fraud.")
 
 # ==============================
 # Layout
@@ -147,7 +154,7 @@ with col1:
     step = st.number_input(
         "Step (Hour) ⓘ",
         min_value=0,
-        value=st.session_state.step,
+        key="step",
         help="Represents the hour at which the transaction occurred during the 30-day simulation."
     )
 
@@ -160,13 +167,7 @@ with col1:
             (3, "PAYMENT"),
             (4, "TRANSFER")
         ],
-        index=[
-            (0, "CASH-IN"),
-            (1, "CASH-OUT"),
-            (2, "DEBIT"),
-            (3, "PAYMENT"),
-            (4, "TRANSFER")
-        ].index(st.session_state.type),
+        key="type",
         format_func=lambda x: x[1],
         help="Type of financial transaction being performed."
     )
@@ -174,14 +175,14 @@ with col1:
     amount = st.number_input(
         "Transaction Amount ⓘ",
         min_value=0.0,
-        value=st.session_state.amount,
+        key="amount",
         help="The amount of money being transferred in the transaction."
     )
 
     oldbalanceOrg = st.number_input(
         "Sender Old Balance ⓘ",
         min_value=0.0,
-        value=st.session_state.oldbalanceOrg,
+        key="oldbalanceOrg",
         help="Account balance of the sender before the transaction."
     )
 
@@ -194,28 +195,28 @@ with col2:
     newbalanceOrig = st.number_input(
         "Sender New Balance ⓘ",
         min_value=0.0,
-        value=st.session_state.newbalanceOrig,
+        key="newbalanceOrig",
         help="Account balance of the sender after the transaction."
     )
 
     oldbalanceDest = st.number_input(
         "Receiver Old Balance ⓘ",
         min_value=0.0,
-        value=st.session_state.oldbalanceDest,
+        key="oldbalanceDest",
         help="Receiver account balance before receiving money."
     )
 
     newbalanceDest = st.number_input(
         "Receiver New Balance ⓘ",
         min_value=0.0,
-        value=st.session_state.newbalanceDest,
+        key="newbalanceDest",
         help="Receiver account balance after receiving money."
     )
 
     isFlaggedFraud = st.selectbox(
         "Flagged Fraud ⓘ",
         [0, 1],
-        index=st.session_state.isFlaggedFraud,
+        key="isFlaggedFraud",
         help="Indicates whether the transaction was already flagged as suspicious by existing systems."
     )
 
