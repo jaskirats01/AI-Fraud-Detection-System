@@ -10,7 +10,7 @@ A transaction-classification project that connects a Random Forest model to a Fa
 
 - Accepts transaction type, amount and sender/receiver balance information.
 - Engineers balance-difference features and returns a fraud label plus model probability.
-- Provides editable inputs and a random-value generator for exploring the interface.
+- Provides editable inputs with **Generate Genuine Demo** and **Generate Fraud Demo** buttons. Each loads a labelled transaction from the notebook; click **Predict Transaction Fraud** to get the model output.
 - Includes the training notebook and serialized model artifacts.
 
 The app is a portfolio demonstration. Its output is a model estimate, not a calibrated financial risk score or a production fraud decision.
