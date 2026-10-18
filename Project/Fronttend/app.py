@@ -46,6 +46,10 @@ h1,h2,h3 {letter-spacing:-.03em;}
 .feature .row {display:flex;justify-content:space-between;padding:7px 0;font-size:13px;color:#b6c4d6;}.feature b {color:#e5edf9;}
 .footer {font-size:11px;color:#71849e;border-top:1px solid #233149;margin-top:23px;padding-top:14px;}
 [data-testid="stMetricValue"] {font-size:30px;}
+@media(min-width:480px) {
+  [data-testid="stForm"] [data-testid="stHorizontalBlock"] {flex-wrap:nowrap!important;}
+  [data-testid="stForm"] [data-testid="stColumn"] {min-width:0!important;flex:1 1 0!important;width:auto!important;}
+}
 @media(max-width:750px) {.block-container{padding:4.4rem 1rem 1.5rem;}.hero h1{font-size:30px;}.stat{padding-left:10px}.stat strong{font-size:21px}.stat span{font-size:9px}}
 </style>
 """, unsafe_allow_html=True)
