@@ -10,7 +10,8 @@ A transaction-classification project that connects a Random Forest model to a Fa
 
 - Accepts transaction type, amount and sender/receiver balance information.
 - Engineers balance-difference features and returns a fraud label plus model probability.
-- Provides editable inputs with **Generate Genuine Demo** and **Generate Fraud Demo** buttons. Each loads a labelled transaction from the notebook; click **Predict Transaction Fraud** to get the model output.
+- Provides a transaction-review dashboard with **Load genuine sample** and **Load fraud sample** buttons. Each loads a labelled notebook transaction; **Analyse transaction** calls the real prediction API.
+- Shows engineered balance features, saved evaluation metrics and downloadable prediction JSON.
 - Includes the training notebook and serialized model artifacts.
 
 The app is a portfolio demonstration. Its output is a model estimate, not a calibrated financial risk score or a production fraud decision.
@@ -30,7 +31,7 @@ flowchart LR
 
 ## Run locally
 
-Use Python 3.10 or newer as a starting point. Dependency versions are currently unpinned; model compatibility depends on the scikit-learn version used to serialize it.
+Use Python 3.10 or newer. The backend pins scikit-learn to 1.7.2, matching the saved model. The report edition was checked locally on Python 3.12.
 
 ```bash
 git clone https://github.com/jaskirats01/AI-Fraud-Detection-System.git
@@ -51,10 +52,19 @@ python -m uvicorn app:app --host 127.0.0.1 --port 8000
 Start the UI in a second terminal from the repository root:
 
 ```bash
+# PowerShell: $env:FRAUD_API_URL="http://127.0.0.1:8000/predict"
+# macOS/Linux: export FRAUD_API_URL="http://127.0.0.1:8000/predict"
 python -m streamlit run Project/Fronttend/app.py
 ```
 
-The UI currently calls a hosted Render endpoint configured by `API_URL` in `Project/Fronttend/app.py`. To connect the UI to your local API, set that constant to `http://127.0.0.1:8000/predict`. This setting is not currently read from an environment variable. Local API docs are available at `http://127.0.0.1:8000/docs`.
+The UI defaults to the hosted Render API. Set `FRAUD_API_URL` to use a local or alternative API; the deployed default remains unchanged. Local API docs are at `http://127.0.0.1:8000/docs`, and `/health` checks model readiness.
+
+Run the regression and validation checks:
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m unittest discover -s tests -v
+```
 
 ## Results recorded in the notebook
 
@@ -83,8 +93,9 @@ These are saved notebook outputs, not newly reproduced benchmarks. High recall c
 ## Next improvements
 
 - Evaluate probability-based ROC-AUC, PR-AUC and threshold trade-offs.
-- Add input constraints, a model-readiness check and consistent error status codes.
-- Move the API URL to configuration and pin a reproducible environment.
-- Add prediction contract tests and document the original dataset source.
+- Evaluate calibration and post-transaction feature availability for a real deployment.
+- Document the original dataset source and preserve a complete training environment.
+
+The October 2026 interface revision adds a responsive dark dashboard, input validation, `/health`, configurable API location, JSON export and ten backend regression checks. It does not retrain the classifier or change the saved benchmark results.
 
 Created by **Jaskirat Singh**.

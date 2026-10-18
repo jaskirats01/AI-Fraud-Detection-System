@@ -2,11 +2,12 @@
 
 [Back to README](../README.md)
 
-Run from `Project/Backend` so the relative model path resolves. FastAPI exposes interactive documentation at `/docs`.
+The model path is resolved relative to the backend module, independently of the working directory. FastAPI exposes interactive documentation at `/docs`.
 
 | Method | Route | Behaviour |
 |---|---|---|
 | GET | `/` | Returns a service greeting; it is not a model-readiness probe |
+| GET | `/health` | Returns model readiness, feature count and tree count; 503 if unavailable |
 | POST | `/predict` | Engineers two balance features and returns a prediction |
 
 ## Example request
@@ -30,8 +31,6 @@ response = requests.post(
 )
 response.raise_for_status()
 result = response.json()
-if "error" in result:
-    raise RuntimeError(result["error"])
 print(result)
 ```
 
@@ -47,6 +46,6 @@ A successful response contains `prediction` (`Fraudulent Transaction` or `Genuin
 
 ## Current operational behaviour
 
-The schema checks Python-compatible types but does not constrain transaction categories, flags or negative amounts. Prediction exceptions currently return an `error` object with HTTP 200. Model-loading exceptions are logged at startup; the greeting can still respond even when prediction is unavailable. Callers should therefore check both status and response shape.
+The schema requires a non-negative integer step, a transaction type from 0 to 4, a flag of 0 or 1, and finite non-negative amounts and balances. Extra fields are rejected. Invalid requests return HTTP 422; an unavailable model returns 503; an unexpected prediction failure returns 500 with a generic message. The successful prediction response retains the original two-field contract.
 
-Before exposing this service beyond a demo, add field bounds, intentional CORS origins, authentication/rate limits where needed, structured error handling and model-readiness monitoring.
+The Streamlit server calls FastAPI server-to-server, so unrestricted CORS is not enabled. Before exposing this service beyond a demo, add authentication, rate limits and operational monitoring appropriate to the deployment.
